@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #e8eef8; }
+  body { padding: 10px; width: 900px; font-family: "Segoe UI", Arial, sans-serif; }
+  .card { width: 880px; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; background: #0b1220; box-shadow: 0 10px 24px rgba(15,23,42,.18); }
+  .hd { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 22px; background: linear-gradient(135deg, #111c31, #0b1220); border-bottom: 1px solid #1e293b; }
+  .lbl { color: #7dd3fc; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+  h1 { margin: 3px 0 0; font: 600 15px/1.25 Consolas, "Courier New", monospace; color: #f8fafc; }
+  .sub { margin: 3px 0 0; color: #94a3b8; font-size: 11px; }
+  .badge { flex: none; padding: 6px 10px; border: 1px solid #1e40af; border-radius: 999px; background: #172554; color: #bfdbfe; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .code { padding: 14px 0 16px; }
+  .line { display: flex; height: 20px; line-height: 20px; font-family: Consolas, "Courier New", monospace; font-size: 12.5px; white-space: pre; }
+  .ln { width: 48px; flex: none; padding-right: 14px; text-align: right; color: #475569; }
+  .tx { padding-right: 20px; color: #dbeafe; }
+  .sep .ln { color: #334155; }
+  .sep .tx { color: #64748b; font-style: italic; }
+  .c { color: #7c8ea8; font-style: italic; }
+  .s { color: #86efac; }
+  .a { color: #7dd3fc; }
+  .k { color: #c084fc; }
+  .n { color: #fbbf24; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="hd">
+      <div>
+        <div class="lbl">Codigo fuente</div>
+        <h1>GlobalExceptionHandler.java</h1>
+        <p class="sub">Respuestas JSON uniformes para todos los errores</p>
+      </div>
+      <div class="badge">ms-cliente - @RestControllerAdvice</div>
+    </div>
+    <div class="code" id="code"></div>
+  </div>
+<script>
+const ENTRIES = [{"n":17,"t":"/**"},{"n":18,"t":" * Centraliza la traducción de excepciones a respuestas JSON uniformes."},{"n":19,"t":" */"},{"n":20,"t":"@RestControllerAdvice"},{"n":21,"t":"public class GlobalExceptionHandler {"},{"n":22,"t":""},{"n":23,"t":"    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);"},{"n":24,"t":""},{"n":25,"t":"    @ExceptionHandler(ResourceNotFoundException.class)"},{"n":26,"t":"    public ResponseEntity\u003cErrorResponse\u003e handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {"},{"n":27,"t":"        return construir(HttpStatus.NOT_FOUND, ex.getMessage(), request, List.of());"},{"n":28,"t":"    }"},{"n":29,"t":""},{"n":30,"t":"    @ExceptionHandler(BusinessException.class)"},{"n":31,"t":"    public ResponseEntity\u003cErrorResponse\u003e handleBusiness(BusinessException ex, HttpServletRequest request) {"},{"n":32,"t":"        return construir(HttpStatus.CONFLICT, ex.getMessage(), request, List.of());"},{"n":33,"t":"    }"},{"n":34,"t":""},{"n":35,"t":"    @ExceptionHandler(BadRequestException.class)"},{"n":36,"t":"    public ResponseEntity\u003cErrorResponse\u003e handleBadRequest(BadRequestException ex, HttpServletRequest request) {"},{"n":37,"t":"        return construir(HttpStatus.BAD_REQUEST, ex.getMessage(), request, List.of());"},{"n":38,"t":"    }"},{"n":39,"t":""},{"n":40,"t":"    @ExceptionHandler(MethodArgumentNotValidException.class)"},{"n":41,"t":"    public ResponseEntity\u003cErrorResponse\u003e handleValidation(MethodArgumentNotValidException ex,"},{"n":42,"t":"                                                          HttpServletRequest request) {"},{"n":43,"t":"        List\u003cFieldErrorDetail\u003e errores = ex.getBindingResult().getFieldErrors().stream()"},{"n":44,"t":"                .map(error -\u003e new FieldErrorDetail(error.getField(), error.getDefaultMessage()))"},{"n":45,"t":"                .toList();"},{"n":46,"t":"        return construir(HttpStatus.BAD_REQUEST, \"Datos inválidos\", request, errores);"},{"n":47,"t":"    }"}];
+const KEYWORDS = /^(public|private|protected|class|interface|extends|implements|new|return|if|else|for|while|try|catch|finally|throw|throws|final|void|static|this|super|import|package|null|true|false|long|int|String|BigDecimal|List|Map|LocalDate|var|const|let|function|async|await|export|default|from|of|in|typeof|instanceof|switch|case|break|continue|do|enum|boolean|double|float|char|byte|abstract|synchronized|volatile|transient|assert|yield|delete|record)$/;
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function paintSegment(seg) {
+  return seg.replace(/(@[A-Za-z_]\w*)|\b([A-Za-z_]\w*)\b|\b(\d+(?:\.\d+)?)\b/g, function (m, ann, word, num) {
+    if (ann) return '<span class="a">' + ann + '</span>';
+    if (word) return KEYWORDS.test(word) ? '<span class="k">' + word + '</span>' : word;
+    if (num) return '<span class="n">' + num + '</span>';
+    return m;
+  });
+}
+function highlight(line) {
+  const t = line.replace(/^\s+/, '');
+  if (/^(\/\/|\/\*|\*|--|#)/.test(t)) return '<span class="c">' + esc(line) + '</span>';
+  let out = '', i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      let j = i + 1;
+      while (j < line.length) { if (line[j] === '\\') { j += 2; continue; } if (line[j] === ch) { j++; break; } j++; }
+      out += '<span class="s">' + esc(line.slice(i, j)) + '</span>';
+      i = j;
+      continue;
+    }
+    if (ch === '/' && line[i + 1] === '/') { out += '<span class="c">' + esc(line.slice(i)) + '</span>'; break; }
+    let j = i;
+    while (j < line.length && !(line[j] === '"' || line[j] === "'" || line[j] === '`' || (line[j] === '/' && line[j + 1] === '/'))) j++;
+    out += paintSegment(esc(line.slice(i, j)));
+    i = j;
+  }
+  return out;
+}
+const code = document.getElementById('code');
+let maxLen = 0;
+for (const e of ENTRIES) {
+  const row = document.createElement('div');
+  if (e.sep) {
+    row.className = 'line sep';
+    row.innerHTML = '<span class="ln">...</span><span class="tx">' + esc(e.text) + '</span>';
+  } else {
+    row.className = 'line';
+    row.innerHTML = '<span class="ln">' + e.n + '</span><span class="tx">' + highlight(e.t) + '</span>';
+    if (e.t.length > maxLen) maxLen = e.t.length;
+  }
+  code.appendChild(row);
+}
+if (maxLen > 108) {
+  const size = Math.max(10.2, 780 / (0.55 * maxLen));
+  document.querySelectorAll('.line').forEach(function (l) { l.style.fontSize = size.toFixed(1) + 'px'; });
+}
+</script>
+</body>
+</html>

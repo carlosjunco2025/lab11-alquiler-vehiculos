@@ -1,0 +1,26 @@
+# Compilados de Maven
+target/
+*.class
+*.jar
+*.war
+
+# Logs y archivos temporales
+logs/
+*.log
+*.tmp
+
+# Variables de entorno locales
+.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+nbproject/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+server:
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: ms-cliente
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    # Perfil dev usa estos valores por defecto. En prod se sobrescriben con variables.
+    username: ${DB_USER:lab11_user}
+    password: ${DB_PASSWORD:lab11_pass}
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true

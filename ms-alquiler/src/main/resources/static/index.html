@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Panel web del Laboratorio 11: alquiler de vehículos con microservicios Spring Boot.">
+  <title>RentaLab · Alquiler de vehículos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">11</div>
+        <div class="brand-text">
+          <strong>RentaLab</strong>
+          <span>Alquiler de vehículos</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Secciones principales">
+        <button class="nav-item active" data-view="dashboard" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+          <span>Panel general</span>
+        </button>
+        <button class="nav-item" data-view="clientes" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+          <span>Clientes</span>
+        </button>
+        <button class="nav-item" data-view="vehiculos" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99ZM6.85 7h10.29l1.08 3.11H5.77L6.85 7ZM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16Zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5Z"/></svg>
+          <span>Vehículos</span>
+        </button>
+        <button class="nav-item" data-view="alquileres" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 16H5V10h14v10ZM5 8V6h14v2H5Zm3 4h5v5H8v-5Z"/></svg>
+          <span>Alquileres</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-line"><span class="dot dot-green"></span> Spring Boot 3.3.5</div>
+        <small>3 microservicios · MySQL 8</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title-block">
+          <p class="eyebrow">Laboratorio 11 · Microservicios</p>
+          <h1 id="page-title">Panel general</h1>
+          <p id="page-subtitle" class="subtitle">Resumen de clientes, vehículos y alquileres.</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="service-pills" id="service-pills" aria-label="Estado de los servicios"></div>
+          <button id="refresh-btn" class="btn btn-ghost" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
+            Actualizar
+          </button>
+        </div>
+      </header>
+
+      <div id="banner" class="banner hidden" role="alert"></div>
+
+      <!-- ==================== PANEL GENERAL ==================== -->
+      <section id="view-dashboard" class="view">
+        <div class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-icon icon-blue">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+            </div>
+            <div>
+              <span class="stat-label">Clientes registrados</span>
+              <strong class="stat-value" id="stat-clientes">—</strong>
+              <small class="stat-hint">ms-cliente · puerto 8081</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon icon-violet">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99ZM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16Zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5Z"/></svg>
+            </div>
+            <div>
+              <span class="stat-label">Vehículos en flota</span>
+              <strong class="stat-value" id="stat-vehiculos">—</strong>
+              <small class="stat-hint">ms-vehiculo · puerto 8082</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon icon-green">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 16.17-4.17-4.17-1.42 1.42L9 19 20.59 7.41 19.17 6 9 16.17Z"/></svg>
+            </div>
+            <div>
+              <span class="stat-label">Vehículos disponibles</span>
+              <strong class="stat-value" id="stat-disponibles">—</strong>
+              <small class="stat-hint">Listos para alquilar</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon icon-amber">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 16H5V10h14v10Z"/></svg>
+            </div>
+            <div>
+              <span class="stat-label">Alquileres activos</span>
+              <strong class="stat-value" id="stat-alquileres">—</strong>
+              <small class="stat-hint">ms-alquiler · puerto 8083</small>
+            </div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Estado de los servicios</h2>
+                <p class="muted">Comunicación HTTP en tiempo real</p>
+              </div>
+              <span class="live-chip"><span class="dot dot-green"></span> En línea</span>
+            </div>
+            <div class="service-grid" id="service-cards"></div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Alquileres recientes</h2>
+                <p class="muted">Últimos movimientos registrados</p>
+              </div>
+              <button class="link-btn" data-go="alquileres" type="button">Ver todos →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>#</th><th>Cliente</th><th>Vehículo</th><th>Fechas</th><th>Importe</th><th>Estado</th></tr>
+                </thead>
+                <tbody id="tbody-recientes"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <article class="card info-card">
+          <div class="info-icon">i</div>
+          <div>
+            <h3>¿Cómo funciona este panel?</h3>
+            <p>El frontend se sirve desde <code>ms-alquiler</code> y consume las tres APIs REST. Al registrar un alquiler, el servicio valida el cliente, comprueba la disponibilidad del vehículo, calcula el importe y cambia el estado del vehículo a <strong>ALQUILADO</strong>.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ==================== CLIENTES ==================== -->
+      <section id="view-clientes" class="view hidden">
+        <div class="section-head">
+          <div>
+            <h2>Clientes</h2>
+            <p>Administra los datos personales de los clientes del servicio de alquiler.</p>
+          </div>
+          <button id="btn-nuevo-cliente" class="btn btn-primary" type="button">+ Nuevo cliente</button>
+        </div>
+
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/></svg>
+            <input id="search-clientes" type="search" placeholder="Buscar por nombre, apellido o DNI">
+          </label>
+          <span class="count-pill" id="count-clientes">0 clientes</span>
+        </div>
+
+        <article class="card table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Cliente</th><th>DNI</th><th>Contacto</th><th>Estado</th><th class="actions-col">Acciones</th></tr>
+              </thead>
+              <tbody id="tbody-clientes"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ==================== VEHÍCULOS ==================== -->
+      <section id="view-vehiculos" class="view hidden">
+        <div class="section-head">
+          <div>
+            <h2>Vehículos</h2>
+            <p>Consulta la flota, las tarifas y el estado de cada unidad.</p>
+          </div>
+          <button id="btn-nuevo-vehiculo" class="btn btn-primary" type="button">+ Nuevo vehículo</button>
+        </div>
+
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/></svg>
+            <input id="search-vehiculos" type="search" placeholder="Buscar por placa, marca o modelo">
+          </label>
+          <select id="filter-vehiculos" class="select" aria-label="Filtrar por estado">
+            <option value="">Todos los estados</option>
+            <option value="DISPONIBLE">Disponibles</option>
+            <option value="ALQUILADO">Alquilados</option>
+            <option value="MANTENIMIENTO">En mantenimiento</option>
+          </select>
+          <span class="count-pill" id="count-vehiculos">0 vehículos</span>
+        </div>
+
+        <article class="card table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Vehículo</th><th>Placa</th><th>Año</th><th>Tarifa diaria</th><th>Estado</th><th class="actions-col">Acciones</th></tr>
+              </thead>
+              <tbody id="tbody-vehiculos"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ==================== ALQUILERES ==================== -->
+      <section id="view-alquileres" class="view hidden">
+        <div class="section-head">
+          <div>
+            <h2>Alquileres</h2>
+            <p>Crea alquileres, finaliza contratos y controla la disponibilidad de la flota.</p>
+          </div>
+          <button id="btn-nuevo-alquiler" class="btn btn-primary" type="button">+ Nuevo alquiler</button>
+        </div>
+
+        <div class="toolbar">
+          <select id="filter-alquileres" class="select" aria-label="Filtrar por estado">
+            <option value="">Todos los estados</option>
+            <option value="ACTIVO">Activos</option>
+            <option value="FINALIZADO">Finalizados</option>
+            <option value="CANCELADO">Cancelados</option>
+          </select>
+          <span class="count-pill" id="count-alquileres">0 alquileres</span>
+          <span class="toolbar-note">El importe se calcula automáticamente: días × tarifa diaria.</span>
+        </div>
+
+        <article class="card table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Cliente</th><th>Vehículo</th><th>Periodo</th><th>Días</th><th>Importe</th><th>Estado</th><th class="actions-col">Acciones</th></tr>
+              </thead>
+              <tbody id="tbody-alquileres"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== MODAL CLIENTE ==================== -->
+  <div id="modal-cliente" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-cliente-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><p class="eyebrow">Clientes</p><h2 id="modal-cliente-title">Nuevo cliente</h2></div>
+        <button class="icon-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <form id="form-cliente" novalidate>
+        <input type="hidden" id="cliente-id">
+        <div class="form-grid">
+          <label class="field"><span>Nombres *</span><input id="cliente-nombres" maxlength="100" required></label>
+          <label class="field"><span>Apellidos *</span><input id="cliente-apellidos" maxlength="100" required></label>
+          <label class="field"><span>DNI *</span><input id="cliente-documento" inputmode="numeric" pattern="\d{8}" maxlength="8" placeholder="8 dígitos" required></label>
+          <label class="field"><span>Teléfono *</span><input id="cliente-telefono" inputmode="numeric" pattern="\d{9}" maxlength="9" placeholder="9 dígitos" required></label>
+          <label class="field field-full"><span>Correo *</span><input id="cliente-correo" type="email" maxlength="150" placeholder="cliente@example.com" required></label>
+          <label class="field"><span>Estado</span>
+            <select id="cliente-estado"><option value="ACTIVO">ACTIVO</option><option value="INACTIVO">INACTIVO</option></select>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="btn-guardar-cliente">Guardar cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL VEHÍCULO ==================== -->
+  <div id="modal-vehiculo" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-vehiculo-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><p class="eyebrow">Vehículos</p><h2 id="modal-vehiculo-title">Nuevo vehículo</h2></div>
+        <button class="icon-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <form id="form-vehiculo" novalidate>
+        <input type="hidden" id="vehiculo-id">
+        <div class="form-grid">
+          <label class="field"><span>Placa *</span><input id="vehiculo-placa" maxlength="10" placeholder="ABC-123" required></label>
+          <label class="field"><span>Marca *</span><input id="vehiculo-marca" maxlength="50" required></label>
+          <label class="field"><span>Modelo *</span><input id="vehiculo-modelo" maxlength="50" required></label>
+          <label class="field"><span>Año *</span><input id="vehiculo-anio" type="number" min="1900" max="2100" required></label>
+          <label class="field"><span>Tarifa diaria (S/) *</span><input id="vehiculo-tarifa" type="number" min="0" step="0.01" required></label>
+          <label class="field"><span>Estado</span>
+            <select id="vehiculo-estado">
+              <option value="DISPONIBLE">DISPONIBLE</option>
+              <option value="ALQUILADO">ALQUILADO</option>
+              <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+            </select>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="btn-guardar-vehiculo">Guardar vehículo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL ALQUILER ==================== -->
+  <div id="modal-alquiler" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-alquiler-title">
+    <div class="modal-card modal-wide">
+      <div class="modal-head">
+        <div><p class="eyebrow">Alquileres</p><h2 id="modal-alquiler-title">Nuevo alquiler</h2></div>
+        <button class="icon-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <form id="form-alquiler" novalidate>
+        <div class="form-grid">
+          <label class="field field-full"><span>Cliente *</span><select id="alquiler-cliente" required></select></label>
+          <label class="field field-full"><span>Vehículo disponible *</span><select id="alquiler-vehiculo" required></select></label>
+          <label class="field"><span>Fecha de inicio *</span><input id="alquiler-inicio" type="date" required></label>
+          <label class="field"><span>Fecha de fin *</span><input id="alquiler-fin" type="date" required></label>
+          <label class="field"><span>Tarifa diaria (opcional)</span><input id="alquiler-tarifa" type="number" min="0" step="0.01" placeholder="Se toma del vehículo"></label>
+        </div>
+
+        <div class="estimate-box" id="estimate-box">
+          <div>
+            <span class="estimate-label">Importe estimado</span>
+            <small id="estimate-detail">Selecciona vehículo y fechas</small>
+          </div>
+          <strong id="estimate-value">S/ 0.00</strong>
+        </div>
+
+        <p class="form-note">Al guardar, el vehículo se marcará como <strong>ALQUILADO</strong> automáticamente. El importe lo calcula el backend y no se envía desde el formulario.</p>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="btn-guardar-alquiler">Registrar alquiler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

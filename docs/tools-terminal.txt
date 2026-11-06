@@ -1,0 +1,19 @@
+﻿PS> curl -s -o NUL -w "%{http_code}" http://localhost:8081/api/clientes
+200
+
+PS> curl -s -o NUL -w "%{http_code}" http://localhost:8082/api/vehiculos
+200
+
+PS> curl -s -o NUL -w "%{http_code}" http://localhost:8083/api/alquileres
+200
+
+PS> curl -s http://localhost:8083/api/alquileres/3
+{"id":3,"idCliente":3,"idVehiculo":3,"fechaInicio":"2026-11-01","fechaFin":"2026-11-06","tarifaDiaria":100.00,"importeEstimado":500.00,"estado":"ACTIVO"}
+
+PS> curl -s -D - -o NUL http://localhost:8081/api/clientes -H "Origin: http://localhost:8083"
+HTTP/1.1 200
+Access-Control-Allow-Origin: http://localhost:8083
+Content-Type: application/json
+
+PS> Get-Content logs\front-ms-alquiler.out.log | Select-String "Tomcat started"
+2026-11-05T22:28:54.490-05:00  INFO 14876 --- [ms-alquiler] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path '/'

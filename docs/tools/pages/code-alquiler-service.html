@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #e8eef8; }
+  body { padding: 10px; width: 900px; font-family: "Segoe UI", Arial, sans-serif; }
+  .card { width: 880px; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; background: #0b1220; box-shadow: 0 10px 24px rgba(15,23,42,.18); }
+  .hd { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 22px; background: linear-gradient(135deg, #111c31, #0b1220); border-bottom: 1px solid #1e293b; }
+  .lbl { color: #7dd3fc; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+  h1 { margin: 3px 0 0; font: 600 15px/1.25 Consolas, "Courier New", monospace; color: #f8fafc; }
+  .sub { margin: 3px 0 0; color: #94a3b8; font-size: 11px; }
+  .badge { flex: none; padding: 6px 10px; border: 1px solid #1e40af; border-radius: 999px; background: #172554; color: #bfdbfe; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .code { padding: 14px 0 16px; }
+  .line { display: flex; height: 20px; line-height: 20px; font-family: Consolas, "Courier New", monospace; font-size: 12.5px; white-space: pre; }
+  .ln { width: 48px; flex: none; padding-right: 14px; text-align: right; color: #475569; }
+  .tx { padding-right: 20px; color: #dbeafe; }
+  .sep .ln { color: #334155; }
+  .sep .tx { color: #64748b; font-style: italic; }
+  .c { color: #7c8ea8; font-style: italic; }
+  .s { color: #86efac; }
+  .a { color: #7dd3fc; }
+  .k { color: #c084fc; }
+  .n { color: #fbbf24; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="hd">
+      <div>
+        <div class="lbl">Codigo fuente</div>
+        <h1>AlquilerService.java</h1>
+        <p class="sub">Reglas de negocio: crear un alquiler y calcular el importe</p>
+      </div>
+      <div class="badge">ms-alquiler - Java 17</div>
+    </div>
+    <div class="code" id="code"></div>
+  </div>
+<script>
+const ENTRIES = [{"n":67,"t":"    @Transactional"},{"n":68,"t":"    public AlquilerResponse crear(AlquilerRequest request) {"},{"n":69,"t":"        validarFechas(request);"},{"n":70,"t":""},{"n":71,"t":"        // 1. El cliente debe existir en ms-cliente."},{"n":72,"t":"        clienteClientService.obtener(request.getIdCliente());"},{"n":73,"t":""},{"n":74,"t":"        // 2. El vehículo debe existir y estar DISPONIBLE en ms-vehiculo."},{"n":75,"t":"        VehiculoRemotoDTO vehiculo = vehiculoClientService.obtener(request.getIdVehiculo());"},{"n":76,"t":"        validarDisponibilidad(vehiculo);"},{"n":77,"t":""},{"n":78,"t":"        // 3. La tarifa puede venir en el DTO; si no, se toma del vehículo."},{"n":79,"t":"        BigDecimal tarifa = resolverTarifa(request, vehiculo);"},{"n":80,"t":""},{"n":81,"t":"        Alquiler alquiler = new Alquiler();"},{"n":82,"t":"        alquiler.setIdCliente(request.getIdCliente());"},{"n":83,"t":"        alquiler.setIdVehiculo(request.getIdVehiculo());"},{"n":84,"t":"        alquiler.setFechaInicio(request.getFechaInicio());"},{"n":85,"t":"        alquiler.setFechaFin(request.getFechaFin());"},{"n":86,"t":"        alquiler.setTarifaDiaria(tarifa);"},{"n":87,"t":"        alquiler.setImporteEstimado(calcularImporte(request.getFechaInicio(), request.getFechaFin(), tarifa));"},{"n":88,"t":"        alquiler.setEstado(EstadoAlquiler.ACTIVO);"},{"n":89,"t":"        alquiler = alquilerRepository.save(alquiler);"},{"n":90,"t":""},{"n":91,"t":"        // 4. Se marca el vehículo como ALQUILADO en su propio microservicio."},{"n":92,"t":"        vehiculoClientService.cambiarEstado(alquiler.getIdVehiculo(), ALQUILADO);"},{"n":93,"t":""},{"n":94,"t":"        return AlquilerResponse.from(alquiler);"},{"n":95,"t":"    }"},{"sep":true,"text":"... fragmento continuo ..."},{"n":198,"t":"    /**"},{"n":199,"t":"     * Días calendario entre las fechas (mínimo 1) por la tarifa diaria."},{"n":200,"t":"     */"},{"n":201,"t":"    private BigDecimal calcularImporte(LocalDate inicio, LocalDate fin, BigDecimal tarifa) {"},{"n":202,"t":"        long dias = ChronoUnit.DAYS.between(inicio, fin);"},{"n":203,"t":"        if (dias \u003c 1) {"},{"n":204,"t":"            dias = 1;"},{"n":205,"t":"        }"},{"n":206,"t":"        return tarifa.multiply(BigDecimal.valueOf(dias)).setScale(2, RoundingMode.HALF_UP);"},{"n":207,"t":"    }"}];
+const KEYWORDS = /^(public|private|protected|class|interface|extends|implements|new|return|if|else|for|while|try|catch|finally|throw|throws|final|void|static|this|super|import|package|null|true|false|long|int|String|BigDecimal|List|Map|LocalDate|var|const|let|function|async|await|export|default|from|of|in|typeof|instanceof|switch|case|break|continue|do|enum|boolean|double|float|char|byte|abstract|synchronized|volatile|transient|assert|yield|delete|record)$/;
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function paintSegment(seg) {
+  return seg.replace(/(@[A-Za-z_]\w*)|\b([A-Za-z_]\w*)\b|\b(\d+(?:\.\d+)?)\b/g, function (m, ann, word, num) {
+    if (ann) return '<span class="a">' + ann + '</span>';
+    if (word) return KEYWORDS.test(word) ? '<span class="k">' + word + '</span>' : word;
+    if (num) return '<span class="n">' + num + '</span>';
+    return m;
+  });
+}
+function highlight(line) {
+  const t = line.replace(/^\s+/, '');
+  if (/^(\/\/|\/\*|\*|--|#)/.test(t)) return '<span class="c">' + esc(line) + '</span>';
+  let out = '', i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      let j = i + 1;
+      while (j < line.length) { if (line[j] === '\\') { j += 2; continue; } if (line[j] === ch) { j++; break; } j++; }
+      out += '<span class="s">' + esc(line.slice(i, j)) + '</span>';
+      i = j;
+      continue;
+    }
+    if (ch === '/' && line[i + 1] === '/') { out += '<span class="c">' + esc(line.slice(i)) + '</span>'; break; }
+    let j = i;
+    while (j < line.length && !(line[j] === '"' || line[j] === "'" || line[j] === '`' || (line[j] === '/' && line[j + 1] === '/'))) j++;
+    out += paintSegment(esc(line.slice(i, j)));
+    i = j;
+  }
+  return out;
+}
+const code = document.getElementById('code');
+let maxLen = 0;
+for (const e of ENTRIES) {
+  const row = document.createElement('div');
+  if (e.sep) {
+    row.className = 'line sep';
+    row.innerHTML = '<span class="ln">...</span><span class="tx">' + esc(e.text) + '</span>';
+  } else {
+    row.className = 'line';
+    row.innerHTML = '<span class="ln">' + e.n + '</span><span class="tx">' + highlight(e.t) + '</span>';
+    if (e.t.length > maxLen) maxLen = e.t.length;
+  }
+  code.appendChild(row);
+}
+if (maxLen > 108) {
+  const size = Math.max(10.2, 780 / (0.55 * maxLen));
+  document.querySelectorAll('.line').forEach(function (l) { l.style.fontSize = size.toFixed(1) + 'px'; });
+}
+</script>
+</body>
+</html>

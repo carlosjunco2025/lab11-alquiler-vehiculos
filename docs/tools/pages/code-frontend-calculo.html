@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #e8eef8; }
+  body { padding: 10px; width: 900px; font-family: "Segoe UI", Arial, sans-serif; }
+  .card { width: 880px; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; background: #0b1220; box-shadow: 0 10px 24px rgba(15,23,42,.18); }
+  .hd { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 22px; background: linear-gradient(135deg, #111c31, #0b1220); border-bottom: 1px solid #1e293b; }
+  .lbl { color: #7dd3fc; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+  h1 { margin: 3px 0 0; font: 600 15px/1.25 Consolas, "Courier New", monospace; color: #f8fafc; }
+  .sub { margin: 3px 0 0; color: #94a3b8; font-size: 11px; }
+  .badge { flex: none; padding: 6px 10px; border: 1px solid #1e40af; border-radius: 999px; background: #172554; color: #bfdbfe; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .code { padding: 14px 0 16px; }
+  .line { display: flex; height: 20px; line-height: 20px; font-family: Consolas, "Courier New", monospace; font-size: 12.5px; white-space: pre; }
+  .ln { width: 48px; flex: none; padding-right: 14px; text-align: right; color: #475569; }
+  .tx { padding-right: 20px; color: #dbeafe; }
+  .sep .ln { color: #334155; }
+  .sep .tx { color: #64748b; font-style: italic; }
+  .c { color: #7c8ea8; font-style: italic; }
+  .s { color: #86efac; }
+  .a { color: #7dd3fc; }
+  .k { color: #c084fc; }
+  .n { color: #fbbf24; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="hd">
+      <div>
+        <div class="lbl">Codigo fuente</div>
+        <h1>app.js - calculo visual</h1>
+        <p class="sub">Vista previa del importe antes de enviar el formulario</p>
+      </div>
+      <div class="badge">Frontend - JavaScript vanilla</div>
+    </div>
+    <div class="code" id="code"></div>
+  </div>
+<script>
+const ENTRIES = [{"n":546,"t":"function updateEstimate() {"},{"n":547,"t":"  const vehicleId = Number($(\u0027#alquiler-vehiculo\u0027).value);"},{"n":548,"t":"  const vehicle = vehicleById(vehicleId);"},{"n":549,"t":"  const start = $(\u0027#alquiler-inicio\u0027).value;"},{"n":550,"t":"  const end = $(\u0027#alquiler-fin\u0027).value;"},{"n":551,"t":"  const rawTariff = $(\u0027#alquiler-tarifa\u0027).value;"},{"n":552,"t":"  const tariff = rawTariff !== \u0027\u0027 ? Number(rawTariff) : Number(vehicle?.tarifaDiaria ?? 0);"},{"n":553,"t":"  const days = daysBetween(start, end);"},{"n":554,"t":"  const value = $(\u0027#estimate-value\u0027);"},{"n":555,"t":"  const detail = $(\u0027#estimate-detail\u0027);"},{"n":556,"t":""},{"n":557,"t":"  if (!vehicle || !start || !end || days === null || days \u003c 1) {"},{"n":558,"t":"    value.textContent = \u0027S/ 0.00\u0027;"},{"n":559,"t":"    detail.textContent = \u0027Selecciona vehículo y fechas válidas\u0027;"},{"n":560,"t":"    return;"},{"n":561,"t":"  }"},{"n":562,"t":""},{"n":563,"t":"  value.textContent = money(Math.max(1, days) * tariff);"},{"n":564,"t":"  detail.textContent = `${Math.max(1, days)} día${days === 1 ? \u0027\u0027 : \u0027s\u0027} × ${money(tariff)}`;"},{"n":565,"t":"}"}];
+const KEYWORDS = /^(public|private|protected|class|interface|extends|implements|new|return|if|else|for|while|try|catch|finally|throw|throws|final|void|static|this|super|import|package|null|true|false|long|int|String|BigDecimal|List|Map|LocalDate|var|const|let|function|async|await|export|default|from|of|in|typeof|instanceof|switch|case|break|continue|do|enum|boolean|double|float|char|byte|abstract|synchronized|volatile|transient|assert|yield|delete|record)$/;
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function paintSegment(seg) {
+  return seg.replace(/(@[A-Za-z_]\w*)|\b([A-Za-z_]\w*)\b|\b(\d+(?:\.\d+)?)\b/g, function (m, ann, word, num) {
+    if (ann) return '<span class="a">' + ann + '</span>';
+    if (word) return KEYWORDS.test(word) ? '<span class="k">' + word + '</span>' : word;
+    if (num) return '<span class="n">' + num + '</span>';
+    return m;
+  });
+}
+function highlight(line) {
+  const t = line.replace(/^\s+/, '');
+  if (/^(\/\/|\/\*|\*|--|#)/.test(t)) return '<span class="c">' + esc(line) + '</span>';
+  let out = '', i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      let j = i + 1;
+      while (j < line.length) { if (line[j] === '\\') { j += 2; continue; } if (line[j] === ch) { j++; break; } j++; }
+      out += '<span class="s">' + esc(line.slice(i, j)) + '</span>';
+      i = j;
+      continue;
+    }
+    if (ch === '/' && line[i + 1] === '/') { out += '<span class="c">' + esc(line.slice(i)) + '</span>'; break; }
+    let j = i;
+    while (j < line.length && !(line[j] === '"' || line[j] === "'" || line[j] === '`' || (line[j] === '/' && line[j + 1] === '/'))) j++;
+    out += paintSegment(esc(line.slice(i, j)));
+    i = j;
+  }
+  return out;
+}
+const code = document.getElementById('code');
+let maxLen = 0;
+for (const e of ENTRIES) {
+  const row = document.createElement('div');
+  if (e.sep) {
+    row.className = 'line sep';
+    row.innerHTML = '<span class="ln">...</span><span class="tx">' + esc(e.text) + '</span>';
+  } else {
+    row.className = 'line';
+    row.innerHTML = '<span class="ln">' + e.n + '</span><span class="tx">' + highlight(e.t) + '</span>';
+    if (e.t.length > maxLen) maxLen = e.t.length;
+  }
+  code.appendChild(row);
+}
+if (maxLen > 108) {
+  const size = Math.max(10.2, 780 / (0.55 * maxLen));
+  document.querySelectorAll('.line').forEach(function (l) { l.style.fontSize = size.toFixed(1) + 'px'; });
+}
+</script>
+</body>
+</html>
